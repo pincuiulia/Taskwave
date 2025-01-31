@@ -1,12 +1,55 @@
 import 'package:flutter/material.dart';
-import 'register.dart'; 
-import '../main/mainpage.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../main/mainpage.dart'; // Importă pagina principală după autentificare
+import 'register.dart'; // Importă pagina de înregistrare
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Controller pentru email și parolă
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    // Funcție pentru autentificare
+    Future<void> login() async {
+      final email = emailController.text.trim();
+      final password = passwordController.text;
+
+      if (email.isEmpty || password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email și parola sunt obligatorii.')),
+        );
+        return;
+      }
+
+      try {
+        final response = await Supabase.instance.client.auth.signInWithPassword(
+          email: email,
+          password: password,
+        );
+
+        if (response.user != null) {
+          // Navighează către pagina principală dacă autentificarea este reușită
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainPage()),
+          );
+        }
+      } on AuthException catch (e) {
+        // Gestionare specifică a erorilor de autentificare
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Eroare de autentificare: ${e.message}')),
+        );
+      } catch (e) {
+        // Gestionare erori generale
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('A apărut o eroare: ${e.toString()}')),
+        );
+      }
+    }
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -35,15 +78,18 @@ class LoginPage extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -56,7 +102,11 @@ class LoginPage extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Funcționalitate în lucru...')),
+                  );
+                },
                 child: const Text(
                   'Forgot your password?',
                   style: TextStyle(
@@ -69,12 +119,7 @@ class LoginPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainPage()),
-                );
-              },
+              onPressed: login, // Apelează funcția de login
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1F41BB),
                 minimumSize: const Size(double.infinity, 60),
@@ -116,26 +161,6 @@ class LoginPage extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.black),
-                ),
-                const SizedBox(width: 20),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.facebook, size: 30, color: Colors.blue),
-                ),
-                const SizedBox(width: 20),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.apple, size: 30, color: Colors.black),
                 ),
               ],
             ),

@@ -1,10 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'login.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Controller pentru email, parola și confirmarea parolei
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    // Funcție pentru înregistrare
+    Future<void> register() async {
+      final email = emailController.text.trim();
+      final password = passwordController.text.trim();
+      final confirmPassword = confirmPasswordController.text.trim();
+
+      if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Toate câmpurile sunt obligatorii.')),
+        );
+        return;
+      }
+
+      if (password != confirmPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Parolele nu se potrivesc.')),
+        );
+        return;
+      }
+
+      try {
+        final response = await Supabase.instance.client.auth.signUp(
+          email: email,
+          password: password,
+        );
+
+        if (response.user != null) {
+          // Afișează un mesaj de succes
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cont creat cu succes! Te rugăm să te autentifici.')),
+          );
+
+          // Navighează către pagina de login
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
+      } on AuthException catch (e) {
+        // Gestionare specifică a erorilor de autentificare
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Eroare la înregistrare: ${e.message}')),
+        );
+      } catch (e) {
+        // Gestionare erori generale
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('A apărut o eroare: ${e.toString()}')),
+        );
+      }
+    }
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -33,15 +91,18 @@ class RegisterPage extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -52,6 +113,7 @@ class RegisterPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: confirmPasswordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
@@ -62,7 +124,7 @@ class RegisterPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: register, // Apelează funcția de înregistrare
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1F41BB),
                 minimumSize: const Size(double.infinity, 60),
@@ -101,26 +163,6 @@ class RegisterPage extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.black),
-                ),
-                const SizedBox(width: 20),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.facebook, size: 30, color: Colors.blue),
-                ),
-                const SizedBox(width: 20),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.apple, size: 30, color: Colors.black),
                 ),
               ],
             ),
