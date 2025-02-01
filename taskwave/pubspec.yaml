@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^1.0.0
+  table_calendar: ^3.0.9
  
 
 dev_dependencies:
@@ -22,6 +23,9 @@ flutter:
   uses-material-design: true
   assets:
     - images/welcomeimage1.png
+
+
+
 
 
 
