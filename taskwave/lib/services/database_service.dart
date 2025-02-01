@@ -7,18 +7,21 @@ class DatabaseService {
 
   /// Fetch all events for a specific day
   Future<List<Map<String, dynamic>>> fetchEventsForDay(DateTime date) async {
-    final response = await client
-        .from('events')
-        .select('*')
-        .eq('date', date.toIso8601String().split('T').first) // Compare only the day
-        .execute();
+  final formattedDate = date.toIso8601String().split('T').first;
+  final response = await client
+      .from('events')
+      .select('*')
+      .filter('start_time', 'gte', '$formattedDate 00:00:00')
+      .filter('start_time', 'lt', '$formattedDate 23:59:59')
+      .execute();
 
-    if (response.status != 200) {
-      throw Exception('Failed to fetch events: ${response.status}');
-    }
-
-    return List<Map<String, dynamic>>.from(response.data as List);
+  if (response.status != 200) {
+    throw Exception('Failed to fetch events: ${response.status}');
   }
+
+  return List<Map<String, dynamic>>.from(response.data as List);
+}
+
 
   /// Add a new event to the database
   Future<void> addEvent({
