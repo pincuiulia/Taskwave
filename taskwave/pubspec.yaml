@@ -12,6 +12,9 @@ dependencies:
     sdk: flutter
   supabase_flutter: ^1.0.0
   table_calendar: ^3.0.9
+  flutter_local_notifications: 18.0.1
+  timezone: ^0.10.0
+
  
 
 dev_dependencies:

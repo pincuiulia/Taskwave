@@ -5,12 +5,15 @@ class DatabaseService {
 
   DatabaseService(this.client);
 
-  /// Fetch all events for a specific day
+  /// Preia toate evenimentele pentru o anumită zi
   Future<List<Map<String, dynamic>>> fetchEventsForDay(DateTime date) async {
+    // Se extrage doar componenta de dată (ex: "2025-02-01")
+    final dayString = date.toIso8601String().split('T').first;
+
     final response = await client
         .from('events')
         .select('*')
-        .eq('date', date.toIso8601String().split('T').first) // Compare only the day
+        .eq('starttime', dayString) // compară doar ziua
         .execute();
 
     if (response.status != 200) {
@@ -20,13 +23,16 @@ class DatabaseService {
     return List<Map<String, dynamic>>.from(response.data as List);
   }
 
-  /// Add a new event to the database
+  /// Adaugă un eveniment nou în baza de date
   Future<void> addEvent({
     required String title,
     String? description,
     required DateTime startTime,
     required DateTime endTime,
   }) async {
+    // Se obține ziua din startTime
+    final dayString = startTime.toIso8601String().split('T').first;
+
     final response = await client
         .from('events')
         .insert({
@@ -34,7 +40,7 @@ class DatabaseService {
           'description': description,
           'start_time': startTime.toIso8601String(),
           'end_time': endTime.toIso8601String(),
-          'date': startTime.toIso8601String().split('T').first,
+          'date': dayString,
         })
         .execute();
 
@@ -43,7 +49,7 @@ class DatabaseService {
     }
   }
 
-  /// Delete an event from the database
+  /// Șterge un eveniment din baza de date
   Future<void> deleteEvent(int eventId) async {
     final response = await client
         .from('events')
@@ -56,7 +62,7 @@ class DatabaseService {
     }
   }
 
-  /// Update an existing event in the database
+  /// Actualizează un eveniment existent în baza de date
   Future<void> updateEvent({
     required int eventId,
     String? title,
